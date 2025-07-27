@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Document Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            color: #333;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: #1a1a2e;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 20px 0;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            gap: 12px;
+        }
+
+        .sidebar-menu a:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 3px solid #4f46e5;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 30px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .panel-header {
+            background: #f9fafb;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-header h3 {
+            font-size: 16px;
+            font-weight: 500;
+            color: #111827;
+        }
+
+        .panel-body {
+            padding: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #4b5563;
+        }
+
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            transition: border 0.2s;
+        }
+
+        input[type="text"]:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4338ca;
+        }
+
+        .file-drop {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            background: #f9fafb;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+
+        .file-drop:hover {
+            border-color: #4f46e5;
+        }
+
+        .file-drop p {
+            color: #6b7280;
+            margin-bottom: 15px;
+        }
+
+        .file-list {
+            list-style: none;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            background: #f9fafb;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 3px solid #f59e0b;
+        }
+
+        .file-item i {
+            margin-right: 10px;
+            color: #f59e0b;
+        }
+
+        .conversation {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            padding: 14px;
+            border-radius: 8px;
+            max-width: 85%;
+        }
+
+        .user {
+            background: #f0f0f0;
+            align-self: flex-end;
+        }
+
+        .ai {
+            background: #f0f7ff;
+            border-left: 3px solid #3b82f6;
+            align-self: flex-start;
+        }
+
+        .metadata {
+            text-align: right;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .badge-error {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Loading spinner */
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .spinner-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: #4f46e5;
+            border-right-color: #4f46e5;
+            animation: spin 1s linear infinite;
+        }
+
+        .spinner-container {
+            text-align: center;
+        }
+
+        .spinner-text {
+            margin-top: 16px;
+            color: #1f2937;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Success message */
+        .success-message {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid #10b981;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .success-message i {
+            font-size: 24px;
+            color: #10b981;
+        }
+
+        .success-message p {
+            color: #065f46;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .success-message .actions {
+            margin-top: 12px;
+        }
+
+        .success-message .actions a {
+            color: #0891b2;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .success-message .actions a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                padding: 15px 0;
+            }
+
+            .sidebar-header h2 span, 
+            .sidebar-menu a span {
+                display: none;
+            }
+
+            .sidebar-header {
+                text-align: center;
+                padding: 0 5px 15px;
+            }
+
+            .sidebar-menu a {
+                justify-content: center;
+                padding: 12px;
+            }
+
+            .main-content {
+                margin-left: 70px;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 0;
+                padding: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
+        /* Utility classes */
+        .mt-4 {
+            margin-top: 16px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div class="spinner-overlay" id="spinner-overlay">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <p class="spinner-text">Processing your request...</p>
+        </div>
+    </div>
+
+    <!-- Simplified Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-robot"></i> <span>DocuChat</span></h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="#" class="active">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="#upload-section" onclick="scrollToElement('upload-section')">
+                    <i class="fas fa-file-upload"></i>
+                    <span>Upload Documents</span>
+                </a>
+            </li>
+            <li>
+                <a href="#chat-section" onclick="scrollToElement('chat-section')">
+                    <i class="fas fa-comments"></i>
+                    <span>Ask Questions</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Document Chat Dashboard</h1>
+            <div>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <div class="panel" id="upload-section">
+            <div class="panel-header">
+                <i class="fas fa-file-upload"></i>
+                <h3>Upload Documents</h3>
+            </div>
+            <div class="panel-body">
+                <div class="file-drop">
+                    <i class="fas fa-cloud-upload-alt fa-3x" style="color:#4f46e5; margin-bottom:10px;"></i>
+                    <p>Drag and drop PDF files here or click to browse</p>
+                    <form method="post" enctype="multipart/form-data" id="upload-form">
+                        {% csrf_token %}
+                        <input type="file" name="pdf_files" multiple accept=".pdf" id="file-input">
+                        <div class="mt-4">
+                            <button type="submit" name="upload" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Upload PDFs
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if pdf_names %}
+        <div class="panel">
+            <div class="panel-header">
+                <i class="fas fa-folder-open"></i>
+                <h3>Available Documents</h3>
+            </div>
+            <div class="panel-body">
+                <div class="success-message">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <p>Great! Your documents are ready. You can now ask questions about them.</p>
+                        <div class="actions">
+                            <a href="#chat-section" onclick="scrollToElement('chat-section')">
+                                <i class="fas fa-arrow-right"></i> Start asking questions now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <ul class="file-list">
+                    {% for name in pdf_names %}
+                    <li class="file-item">
+                        <i class="fas fa-file-pdf"></i>
+                        {{ name }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="panel" id="chat-section">
+            <div class="panel-header">
+                <i class="fas fa-comment-alt"></i>
+                <h3>Ask a Question</h3>
+            </div>
+            <div class="panel-body">
+                <form method="post" id="question-form">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <label for="question">What would you like to know about your documents?</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="question" name="question" placeholder="Type your question here..." required style="flex: 1;">
+                            <button type="submit" name="ask" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Ask
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if response %}
+                <div class="conversation mt-4">
+                    <div class="message user">
+                        <p>{{ question }}</p>
+                        <div class="metadata">You • Just now</div>
+                    </div>
+                    <div class="message ai">
+                        <p>{{ response }}</p>
+                        <div class="metadata">AI Assistant • Response time: {{ response_time }}s</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if error %}
+                <div class="mt-4">
+                    <div class="file-item" style="border-left-color: #dc2626;">
+                        <i class="fas fa-exclamation-circle" style="color: #dc2626;"></i>
+                        {{ error }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if message %}
+                <div class="mt-4">
+                    <div class="file-item" style="border-left-color: #16a34a;">
+                        <i class="fas fa-check-circle" style="color: #16a34a;"></i>
+                        {{ message }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show loading spinner when forms are submitted
+        document.addEventListener('DOMContentLoaded', function() {
+            const spinner = document.getElementById('spinner-overlay');
+            const uploadForm = document.getElementById('upload-form');
+            const questionForm = document.getElementById('question-form');
+            
+            if (uploadForm) {
+                uploadForm.addEventListener('submit', function() {
+                    spinner.classList.add('active');
+                });
+            }
+            
+            if (questionForm) {
+                questionForm.addEventListener('submit', function() {
+                    spinner.classList.add('active');
+                });
+            }
+        });
+
+        // Smooth scroll function
+        function scrollToElement(elementId) {
+            event.preventDefault();
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -53,7 +53,7 @@ This application follows the Retrieval Augmented Generation (RAG) architecture:
 
 1. Clone the repository:
    ```
-   git clone https://github.com/ChitwanRana/document-chat.git
+   git clone https://github.com/div-069/document-chat.git
    cd document-chat
    ```
 
